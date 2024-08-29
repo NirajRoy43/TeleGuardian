@@ -1,22 +1,24 @@
+import os
 import logging
 from telethon import TelegramClient, events
+from telethon.errors import SessionPasswordNeededError
 from telethon.tl.functions.contacts import BlockRequest
-from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.errors import UserNotParticipantError
 from pymongo import MongoClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Your Telegram API credentials
-api_id = '4484756'
-api_hash = 'd90223b0899a3bd493d63d93823ae6c8'
+# Your Telegram API credentials from environment variables
+api_id = os.getenv('API_ID')
+api_hash = os.getenv('API_HASH')
 
+# Initialize the Telegram client
 client = TelegramClient('session_name', api_id, api_hash)
 
-# MongoDB Atlas connection
-mongo_client = MongoClient('mongodb+srv://Okayniraj:Okayniraj143@cluster0.t95k4et.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+# MongoDB Atlas connection from environment variable
+mongo_uri = os.getenv('MONGODB_URI')
+mongo_client = MongoClient(mongo_uri)
 db = mongo_client['test']  # Replace 'test' with your actual database name
 approved_users_collection = db['approved_users']
 
@@ -27,6 +29,31 @@ approved_users = set()  # Set to store approved users
 
 # Path to the GIF file
 video_or_gif_path = 'https://i.postimg.cc/fWgdYxf8/21970003.gif'  # Change this to your actual file path
+
+async def main():
+    # Get phone number from environment variable
+    phone = os.getenv('TELEGRAM_PHONE')
+
+    # Start the client
+    await client.start()
+
+    # Check if the user is authorized
+    if not await client.is_user_authorized():
+        # Send code request
+        await client.send_code_request(phone)
+        otp = os.getenv('TELEGRAM_OTP')  # Get OTP from environment variable
+
+        if otp:
+            try:
+                await client.sign_in(phone, otp)
+            except SessionPasswordNeededError:
+                password = os.getenv('TELEGRAM_PASSWORD')  # Get password from environment variable
+                if password:
+                    await client.sign_in(password=password)
+                else:
+                    logger.error("Password required but not provided in environment variables.")
+        else:
+            logger.error("OTP not provided. Please set the TELEGRAM_OTP environment variable.")
 
 @client.on(events.NewMessage(incoming=True))
 async def handle_pm(event):
@@ -49,12 +76,11 @@ async def handle_pm(event):
         await client.send_file(
             sender.id,
             video_or_gif_path,
-            caption=("👋 **Konnichiwa , Shiranai hito!**\n\n"
-			"Watashi wa **ITACHI UCHIHA** desu, the digital guardian of my Boss's Realm. 🥷⛩️\n\n"
-			"Your message is in the queue, so don't rush.\n"
-			"Don't spam , else you'll be hit with Amaterasu!🌀⚡\n\n"
-			"~ SAYONARA 🍂"
-            )
+            caption=("👋 **Konnichiwa, Shiranai hito!**\n\n"
+                     "Watashi wa **ITACHI UCHIHA** desu, the digital guardian of my Boss's Realm. 🥷⛩️\n\n"
+                     "Your message is in the queue, so don't rush.\n"
+                     "Don't spam, else you'll be hit with Amaterasu!🌀⚡\n\n"
+                     "~ SAYONARA 🍂")
         )
     else:
         # Increment the message count for the user
@@ -63,8 +89,8 @@ async def handle_pm(event):
         # Warn the user if they are close to the limit
         if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
             await event.reply(
-                f"Huh, You DUMB!😒\n"
-                f"Send one more messages & you'll be under my Genjutsu!🤧"
+                "Huh, You DUMB!😒\n"
+                "Send one more message & you'll be under my Genjutsu!🤧"
             )
 
     # Check if the user has sent more than the allowed number of messages
@@ -75,12 +101,8 @@ async def handle_pm(event):
         # Send a final notice before blocking
         await client.send_message(
             sender.id,
-            "Doke,Bakayarou 🤡"
-            
+            "Doke, Bakayarou 🤡"
         )
-
-        # Optionally, delete the user's messages (if desired)
-        # await client.delete_messages(chat_id, [event.message.id for _ in range(user_message_count[sender.id])])
 
 @client.on(events.NewMessage(pattern='!approve'))
 async def approve_user(event):
@@ -111,5 +133,6 @@ async def disapprove_user(event):
         await event.respond("Reply to a user's message with !disapprove to disapprove them.")
 
 # Start the Telegram client
-client.start()
-client.run_until_disconnected()
+with client:
+    client.loop.run_until_complete(main())
+    client.run_until_disconnected()
