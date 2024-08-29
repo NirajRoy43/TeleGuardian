@@ -1,1 +1,1 @@
-worker: python itachi.py
+web: python itachi.py
