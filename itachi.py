@@ -1,6 +1,7 @@
 import os
 import logging
 from telethon import TelegramClient, events
+from telethon.errors import SessionPasswordNeededError
 from telethon.tl.functions.contacts import BlockRequest
 from pymongo import MongoClient
 
@@ -16,7 +17,7 @@ api_hash = os.getenv('API_HASH')
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
 
 # Initialize the Telegram client with the session string
-client = TelegramClient(session_string, api_id, api_hash)
+client = TelegramClient('session_name', api_id, api_hash)
 
 # MongoDB Atlas connection from environment variable
 mongo_uri = os.getenv('MONGODB_URI')
@@ -33,7 +34,7 @@ approved_users = set()  # Set to store approved users
 video_or_gif_path = 'https://i.postimg.cc/fWgdYxf8/21970003.gif'  # Change this to your actual file path
 
 async def main():
-    # Start the client
+    # Start the client with the session string
     await client.start()
 
 @client.on(events.NewMessage(incoming=True))
