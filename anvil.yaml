@@ -1,0 +1,7 @@
+# anvil.yaml
+
+name: My Anvil App
+version: 1.0
+dependencies:
+  - pymongo
+  - telethon
