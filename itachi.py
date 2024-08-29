@@ -1,7 +1,6 @@
 import os
 import logging
 from telethon import TelegramClient, events
-from telethon.errors import SessionPasswordNeededError
 from telethon.tl.functions.contacts import BlockRequest
 from pymongo import MongoClient
 
@@ -13,8 +12,11 @@ logger = logging.getLogger(__name__)
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 
-# Initialize the Telegram client
-client = TelegramClient('session_name', api_id, api_hash)
+# Use the session string from environment variable
+session_string = os.getenv('TELEGRAM_SESSION_STRING')
+
+# Initialize the Telegram client with the session string
+client = TelegramClient(session_string, api_id, api_hash)
 
 # MongoDB Atlas connection from environment variable
 mongo_uri = os.getenv('MONGODB_URI')
@@ -31,29 +33,8 @@ approved_users = set()  # Set to store approved users
 video_or_gif_path = 'https://i.postimg.cc/fWgdYxf8/21970003.gif'  # Change this to your actual file path
 
 async def main():
-    # Get phone number from environment variable
-    phone = os.getenv('TELEGRAM_PHONE')
-
     # Start the client
     await client.start()
-
-    # Check if the user is authorized
-    if not await client.is_user_authorized():
-        # Send code request
-        await client.send_code_request(phone)
-        otp = os.getenv('TELEGRAM_OTP')  # Get OTP from environment variable
-
-        if otp:
-            try:
-                await client.sign_in(phone, otp)
-            except SessionPasswordNeededError:
-                password = os.getenv('TELEGRAM_PASSWORD')  # Get password from environment variable
-                if password:
-                    await client.sign_in(password=password)
-                else:
-                    logger.error("Password required but not provided in environment variables.")
-        else:
-            logger.error("OTP not provided. Please set the TELEGRAM_OTP environment variable.")
 
 @client.on(events.NewMessage(incoming=True))
 async def handle_pm(event):
