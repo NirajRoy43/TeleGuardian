@@ -60,9 +60,9 @@ async def handle_pm(event):
         await client.send_file(
             sender.id,
             video_or_gif_path,
-            caption=("👋 **Konnichiwa, Shiranai hito!**\n\n"
-                     "Watashi wa **ITACHI UCHIHA** desu, the digital guardian of my Boss's Realm. 🥷⛩️\n\n"
-                     "Your message is in the queue, so don't rush.\n"
+            caption=("👋 **Greetings, Stranger!**\n\n"
+                     "I am **ITACHI**, the Digital Guardian of Niraj's Realm. 🥷⛩️\n\n"
+                     "Your message is in the queue,have Patience.\n"
                      "Don't spam, else you'll be hit with Amaterasu!🌀⚡\n\n"
                      "~ SAYONARA 🍂")
         )
@@ -74,7 +74,7 @@ async def handle_pm(event):
         if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
             await event.reply(
                 "Huh, You DUMB!😒\n"
-                "Send one more message & you'll be under my Genjutsu!🤧"
+                "One more msg & you'll be under my Genjutsu!🤧"
             )
 
     # Check if the user has sent more than the allowed number of messages
@@ -85,7 +85,7 @@ async def handle_pm(event):
         # Send a final notice before blocking
         await client.send_message(
             sender.id,
-            "Doke, Bakayarou 🤡"
+            "~ BAKA 🤡"
         )
 
 @client.on(events.NewMessage(pattern='!approve'))
