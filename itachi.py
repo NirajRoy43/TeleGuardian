@@ -62,7 +62,7 @@ async def handle_pm(event):
             video_or_gif_path,
             caption=("👋 **Greetings, Stranger!**\n\n"
                      "I am **ITACHI**, the Digital Guardian of Niraj's Realm. 🥷⛩️\n\n"
-                     "He is currently offline doing Digital Detox 🧘🏻🐱\n"
+                     "He's currently OFF doing Digital Detox 🧘🏻\n\n"
                      "Don't spam, else you'll be hit with Amaterasu!🌀⚡\n\n"
                      "~ SAYONARA 🍂")
         )
