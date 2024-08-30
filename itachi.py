@@ -17,7 +17,7 @@ api_hash = os.getenv('API_HASH')
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
 
 # Initialize the Telegram client with the session string
-client = TelegramClient('session_name', api_id, api_hash)
+client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
 # MongoDB Atlas connection from environment variable
 mongo_uri = os.getenv('MONGODB_URI')
@@ -36,6 +36,7 @@ video_or_gif_path = 'https://i.postimg.cc/fWgdYxf8/21970003.gif'  # Change this 
 async def main():
     # Start the client with the session string
     await client.start()
+    logger.info("Bot started and running...")
 
 @client.on(events.NewMessage(incoming=True))
 async def handle_pm(event):
@@ -85,6 +86,7 @@ async def handle_pm(event):
             sender.id,
             "Doke, Bakayarou 🤡"
         )
+        logger.info(f"Blocked user {sender.id} after exceeding message limit.")
 
 @client.on(events.NewMessage(pattern='!approve'))
 async def approve_user(event):
@@ -99,6 +101,7 @@ async def approve_user(event):
             upsert=True
         )
         await event.respond(f"User {sender.username} approved to message you.")
+        logger.info(f"User {sender.username} approved.")
     else:
         await event.respond("Reply to a user's message with !approve to approve them.")
 
@@ -111,6 +114,7 @@ async def disapprove_user(event):
         approved_users.discard(sender.id)
         approved_users_collection.delete_one({'user_id': sender.id})
         await event.respond(f"User {sender.username} disapproved from messaging you.")
+        logger.info(f"User {sender.username} disapproved.")
     else:
         await event.respond("Reply to a user's message with !disapprove to disapprove them.")
 
