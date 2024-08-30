@@ -4,6 +4,7 @@ from telethon import TelegramClient, events
 from telethon.errors import SessionPasswordNeededError
 from telethon.tl.functions.contacts import BlockRequest
 from pymongo import MongoClient
+from telethon.sessions import StringSession
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
