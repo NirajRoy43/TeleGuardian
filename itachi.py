@@ -18,7 +18,7 @@ bot_token = os.getenv('BOT_TOKEN')  # Add this line to get the bot token
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
 
 # Initialize the Telegram client with the bot token
-client = TelegramClient('session_name', api_id, api_hash).start(bot_token=bot_token)
+client = TelegramClient(session_string, api_id, api_hash)
 
 # MongoDB Atlas connection from environment variable
 mongo_uri = os.getenv('MONGODB_URI')
