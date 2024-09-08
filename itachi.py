@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 with open('text.json', 'r', encoding='utf-8') as f:
-    messages = json.load(f)
+    text = json.load(f)
 
 # Your Telegram API credentials from environment variables
 api_id = os.getenv('API_ID')
