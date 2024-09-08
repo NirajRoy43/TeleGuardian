@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 # Your credentials for environment variables
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
-bot_token = os.getenv('BOT_TOKEN')
 bot_owner_id = os.getenv('BOT_OWNER_ID')
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
 video_or_gif_path = os.getenv('GIF_URL')
