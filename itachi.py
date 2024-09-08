@@ -39,6 +39,14 @@ async def main():
     # Start the client with the session string
     await client.start()
 
+    # Load approved users from MongoDB at startup
+    async for user in approved_users_collection.find():
+        approved_users.add(user['user_id'])
+        logger.info(f"Loaded approved user: {user['username']} (ID: {user['user_id']})")
+
+    logger.info("Approved users loaded from MongoDB.")
+
+
 @client.on(events.NewMessage(incoming=True))
 async def handle_pm(event):
     chat_id = event.chat_id
