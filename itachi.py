@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import asyncio
 from telethon import TelegramClient, events
 from telethon.errors import SessionPasswordNeededError
 from telethon.tl.functions.contacts import BlockRequest
