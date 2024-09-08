@@ -56,8 +56,8 @@ async def handle_pm(event):
     chat_id = event.chat_id
     sender = await event.get_sender()
 
-    # Ignore messages from groups or channels
-    if event.is_group or event.is_channel:
+    # Ignore messages from groups, channels, bots, and your own saved messages
+    if event.is_group or event.is_channel or sender.bot or event.is_self:
         return
 
     # If the user is approved, allow the messages
@@ -112,7 +112,7 @@ async def approve_user(event):
     sender = await event.get_sender()
 
     # Only the bot owner can approve users
-    if sender.id == bot_owner_id:
+    if sender.id == int(bot_owner_id):
         if event.is_reply:
             reply_message = await event.get_reply_message()
             user_to_approve = await reply_message.get_sender()
@@ -126,9 +126,11 @@ async def approve_user(event):
             )
             approval_message = await event.respond(f"User {user_to_approve.username} approved to message you.")
 
-            # Store the approval message ID
+            # Track the approval message ID
             if user_to_approve.id in bot_messages:
                 bot_messages[user_to_approve.id].append(approval_message.id)
+            else:
+                bot_messages[user_to_approve.id] = [approval_message.id]
 
             # Delete the bot's previous messages for this user (GIF, warnings, etc.)
             if user_to_approve.id in bot_messages:
@@ -141,6 +143,7 @@ async def approve_user(event):
             await event.respond("Reply to a user's message with !approve to approve them.")
     else:
         await event.respond("You don't have permission to use this command.")
+
 
 @client.on(events.NewMessage(pattern='!disapprove'))
 async def disapprove_user(event):
