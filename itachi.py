@@ -89,9 +89,12 @@ async def handle_pm(event):
 
             # Warn the user if they are close to the limit
             if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
-                warning_message = await event.reply(
-                    text["warning_message"]
-                )
+                warning_message = await event.reply(text["warning_message"])
+
+                # Initialize the bot_messages entry if it doesn't exist
+                if sender.id not in bot_messages:
+                    bot_messages[sender.id] = []  # Create an empty list for this user
+
                 # Store the warning message ID in the bot_messages dictionary
                 bot_messages[sender.id].append(warning_message.id)
 
@@ -105,8 +108,11 @@ async def handle_pm(event):
                 sender.id,
                 text["final_message"]
             )
-            bot_messages[sender.id].append(final_message.id)
+            # Ensure the bot_messages entry exists
+            if sender.id not in bot_messages:
+                bot_messages[sender.id] = []
 
+            bot_messages[sender.id].append(final_message.id)
             
 
 @client.on(events.NewMessage(pattern='!approve'))
