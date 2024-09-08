@@ -48,6 +48,13 @@ async def handle_pm(event):
     if event.is_group or event.is_channel:
         return
 
+    # Get the current user's ID (your ID)
+    me = await client.get_me()
+
+    # Ignore messages sent by yourself or from the saved messages chat
+    if sender.id == me.id or event.is_private and sender.bot:
+        return
+
     # If the user is approved, allow the messages
     if sender.id in approved_users:
         return
@@ -87,6 +94,7 @@ async def handle_pm(event):
             sender.id,
             "~ BAKA 🤡"
         )
+
 
 @client.on(events.NewMessage(pattern='!approve'))
 async def approve_user(event):
