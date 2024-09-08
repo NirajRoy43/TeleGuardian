@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
-bot_owner_id = "7279627904"
+bot_owner_id = 7279627904
 
 # Use the session string from environment variable
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
