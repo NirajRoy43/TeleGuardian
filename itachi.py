@@ -163,6 +163,8 @@ async def disapprove_user(event):
             approved_users_collection.delete_one({'user_id': user_to_disapprove.id})
             await event.respond(f"User {user_to_disapprove.username} disapproved from messaging you.")
 
+             user_message_count[user_to_disapprove.id] = 0
+
             # Send a new message to notify about the disapproval
             disapproval_message = await client.send_message(
                 user_to_disapprove.id,
