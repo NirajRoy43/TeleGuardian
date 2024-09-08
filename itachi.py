@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
-bot_owner_id = 7279627904
+bot_owner_id = "7279627904"  # Replace with your own Telegram user ID
 
 # Use the session string from environment variable
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
@@ -47,7 +47,6 @@ async def main():
 
     logger.info("Approved users loaded from MongoDB.")
 
-
 # Dictionary to keep track of messages sent by the bot (store message IDs per user)
 bot_messages = {}
 
@@ -56,56 +55,60 @@ async def handle_pm(event):
     chat_id = event.chat_id
     sender = await event.get_sender()
 
-    # Ignore messages from groups, channels, bots, and your own saved messages
-    if event.is_group or event.is_channel or sender.bot or event.is_self:
+    # Ignore messages from groups or channels
+    if event.is_group or event.is_channel:
         return
 
     # If the user is approved, allow the messages
     if sender.id in approved_users:
         return
 
-    # Track the user's messages
-    if sender.id not in user_message_count:
-        user_message_count[sender.id] = 1
+    # Check if the user is disapproved
+    if sender.id not in approved_users:
+        # Track the user's messages
+        if sender.id not in user_message_count:
+            user_message_count[sender.id] = 1
 
-        # Send a professional-looking message with video/GIF and store the message ID
-        gif_message = await client.send_file(
-            sender.id,
-            video_or_gif_path,
-            caption=("👋 **Greetings, Stranger!**\n\n"
-                     "I am **ITACHI**, the Digital Guardian of Niraj's Realm. 🥷⛩️\n\n"
-                     "He's currently OFF doing Digital Detox 🧘🏻\n\n"
-                     "Don't spam, else you'll be hit with Amaterasu!🌀⚡\n\n"
-                     "~ SAYONARA 🍂")
-        )
-
-        # Store the message ID in the bot_messages dictionary
-        bot_messages[sender.id] = [gif_message.id]
-
-    else:
-        # Increment the message count for the user
-        user_message_count[sender.id] += 1
-
-        # Warn the user if they are close to the limit
-        if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
-            warning_message = await event.reply(
-                "Huh, You DUMB!😒\n"
-                "One more msg & you'll be under my Genjutsu!🤧"
+            # Send a professional-looking message with video/GIF and store the message ID
+            gif_message = await client.send_file(
+                sender.id,
+                video_or_gif_path,
+                caption=("👋 **Greetings, Stranger!**\n\n"
+                         "I am **ITACHI**, the Digital Guardian of Niraj's Realm. 🥷⛩️\n\n"
+                         "He's currently OFF doing Digital Detox 🧘🏻\n\n"
+                         "Don't spam, else you'll be hit with Amaterasu!🌀⚡\n\n"
+                         "~ SAYONARA 🍂")
             )
-            # Store the warning message ID in the bot_messages dictionary
-            bot_messages[sender.id].append(warning_message.id)
 
-    # Check if the user has sent more than the allowed number of messages
-    if user_message_count[sender.id] >= MAX_UNAPPROVED_MESSAGES:
-        # Block the user
-        await client(BlockRequest(id=sender.id))
+            # Store the message ID in the bot_messages dictionary
+            bot_messages[sender.id] = [gif_message.id]
 
-        # Send a final notice before blocking and store the message ID
-        final_message = await client.send_message(
-            sender.id,
-            "~ BAKA 🤡"
-        )
-        bot_messages[sender.id].append(final_message.id)
+        else:
+            # Increment the message count for the user
+            user_message_count[sender.id] += 1
+
+            # Warn the user if they are close to the limit
+            if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
+                warning_message = await event.reply(
+                    "Huh, You DUMB!😒\n"
+                    "One more msg & you'll be under my Genjutsu!🤧"
+                )
+                # Store the warning message ID in the bot_messages dictionary
+                bot_messages[sender.id].append(warning_message.id)
+
+        # Check if the user has sent more than the allowed number of messages
+        if user_message_count[sender.id] >= MAX_UNAPPROVED_MESSAGES:
+            # Block the user
+            await client(BlockRequest(id=sender.id))
+
+            # Send a final notice before blocking and store the message ID
+            final_message = await client.send_message(
+                sender.id,
+                "~ BAKA 🤡"
+            )
+            bot_messages[sender.id].append(final_message.id)
+
+            # Optionally, log this event or handle it in other ways if necessary
 
 @client.on(events.NewMessage(pattern='!approve'))
 async def approve_user(event):
@@ -126,16 +129,17 @@ async def approve_user(event):
             )
             approval_message = await event.respond(f"User {user_to_approve.username} approved to message you.")
 
-            # Track the approval message ID
+            # Store the approval message ID
             if user_to_approve.id in bot_messages:
                 bot_messages[user_to_approve.id].append(approval_message.id)
-            else:
-                bot_messages[user_to_approve.id] = [approval_message.id]
 
             # Delete the bot's previous messages for this user (GIF, warnings, etc.)
             if user_to_approve.id in bot_messages:
                 for message_id in bot_messages[user_to_approve.id]:
-                    await client.delete_messages(user_to_approve.id, message_id)
+                    try:
+                        await client.delete_messages(user_to_approve.id, message_id)
+                    except Exception as e:
+                        logger.error(f"Failed to delete message {message_id}: {e}")
 
                 # Clear the stored messages after deleting them
                 del bot_messages[user_to_approve.id]
@@ -144,13 +148,12 @@ async def approve_user(event):
     else:
         await event.respond("You don't have permission to use this command.")
 
-
 @client.on(events.NewMessage(pattern='!disapprove'))
 async def disapprove_user(event):
     sender = await event.get_sender()
-    
-    # Check if the sender is the bot owner
-    if sender.id == bot_owner_id:
+
+    # Only the bot owner can disapprove users
+    if sender.id == int(bot_owner_id):
         if event.is_reply:
             reply_message = await event.get_reply_message()
             user_to_disapprove = await reply_message.get_sender()
@@ -159,6 +162,24 @@ async def disapprove_user(event):
             approved_users.discard(user_to_disapprove.id)
             approved_users_collection.delete_one({'user_id': user_to_disapprove.id})
             await event.respond(f"User {user_to_disapprove.username} disapproved from messaging you.")
+
+            # Send a new message to notify about the disapproval
+            disapproval_message = await client.send_message(
+                user_to_disapprove.id,
+                "You have been disapproved. No further messages will be processed."
+            )
+            bot_messages[user_to_disapprove.id] = [disapproval_message.id]
+
+            # Delete the bot's previous messages for this user (GIF, warnings, etc.)
+            if user_to_disapprove.id in bot_messages:
+                for message_id in bot_messages[user_to_disapprove.id]:
+                    try:
+                        await client.delete_messages(user_to_disapprove.id, message_id)
+                    except Exception as e:
+                        logger.error(f"Failed to delete message {message_id}: {e}")
+
+                # Clear the stored messages after deleting them
+                del bot_messages[user_to_disapprove.id]
         else:
             await event.respond("Reply to a user's message with !disapprove to disapprove them.")
     else:
