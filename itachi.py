@@ -56,7 +56,7 @@ async def handle_pm(event):
     sender = await event.get_sender()
 
     # Ignore messages from groups or channels
-    if event.is_group or event.is_channel:
+    if event.is_group or event.is_channel or sender.bot or event.is_self:
         return
 
     # If the user is approved, allow the messages
