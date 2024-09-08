@@ -19,27 +19,26 @@ with open('text.json', 'r', encoding='utf-8') as f:
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
-bot_owner_id = 7279627904  # Replace with your own Telegram user ID
-
-# Use the session string from environment variable
+bot_owner_id = os.getenv('BOT_OWNER_ID')
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
 
 # Initialize the Telegram client with the bot token
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
-# MongoDB Atlas connection from environment variable
+# MongoDB Atlas 
 mongo_uri = os.getenv('MONGODB_URI')
 mongo_client = MongoClient(mongo_uri)
-db = mongo_client['test']  # Replace 'test' with your actual database name
+database_name = text["database_name"]
+db = mongo_client[database_name]  
 approved_users_collection = db['approved_users']
 
 # Spam protection settings
 MAX_UNAPPROVED_MESSAGES = 5
 user_message_count = {}
-approved_users = set()  # Set to store approved users
+approved_users = set()  
 
 # Path to the GIF file
-video_or_gif_path = 'https://i.postimg.cc/fWgdYxf8/21970003.gif'  # Change this to your actual file path
+video_or_gif_path = text["gif_url"]
 
 async def main():
     # Start the client with the session string
@@ -60,7 +59,7 @@ async def handle_pm(event):
     chat_id = event.chat_id
     sender = await event.get_sender()
 
-    # Ignore messages from groups or channels
+    # Ignore messages from groups or channels or bots
     if event.is_group or event.is_channel or sender.bot :
         return
 
