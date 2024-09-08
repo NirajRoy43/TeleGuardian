@@ -30,7 +30,7 @@ db = mongo_client['test']
 approved_users_collection = db['approved_users']
 
 # Spam protection settings
-MAX_UNAPPROVED_MESSAGES = os.getenv('MAX_UNAPPROVED_MSG')
+MAX_UNAPPROVED_MESSAGES = int(os.getenv('MAX_UNAPPROVED_MSG'))
 user_message_count = {}
 approved_users = set()  
 
