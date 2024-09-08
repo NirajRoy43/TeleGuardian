@@ -19,6 +19,7 @@ bot_owner_id = os.getenv('BOT_OWNER_ID')
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
 video_or_gif_path = os.getenv('GIF_URL')
 mongo_uri = os.getenv('MONGODB_URI')
+final_msg = os.getenv('FINAL_MSG')
 
 # Initialize the Telegram client with the bot token
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
@@ -100,7 +101,7 @@ async def handle_pm(event):
             # Send a final notice before blocking and store the message ID
             final_message = await client.send_message(
                 sender.id,
-                os.getenv('FINAL_MESSSAGE')
+                final_msg
             )
             # Ensure the bot_messages entry exists
             if sender.id not in bot_messages:
