@@ -73,11 +73,7 @@ async def handle_pm(event):
             gif_message = await client.send_file(
                 sender.id,
                 video_or_gif_path,
-                caption=("👋 **Greetings, Stranger!**\n\n"
-                         "I am **ITACHI**, the Digital Guardian of Niraj's Realm. 🥷⛩️\n\n"
-                         "He's currently OFF doing Digital Detox 🧘🏻\n\n"
-                         "Don't spam, else you'll be hit with Amaterasu!🌀⚡\n\n"
-                         "~ SAYONARA 🍂")
+                caption=text["caption"]
             )
 
             # Store the message ID in the bot_messages dictionary
@@ -90,8 +86,7 @@ async def handle_pm(event):
             # Warn the user if they are close to the limit
             if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
                 warning_message = await event.reply(
-                    "Huh, You DUMB!😒\n"
-                    "One more msg & you'll be under my Genjutsu!🤧"
+                    text["warning_message"]
                 )
                 # Store the warning message ID in the bot_messages dictionary
                 bot_messages[sender.id].append(warning_message.id)
@@ -104,11 +99,11 @@ async def handle_pm(event):
             # Send a final notice before blocking and store the message ID
             final_message = await client.send_message(
                 sender.id,
-                "~ BAKA 🤡"
+                text["final_message"]
             )
             bot_messages[sender.id].append(final_message.id)
 
-            # Optionally, log this event or handle it in other ways if necessary
+            
 
 @client.on(events.NewMessage(pattern='!approve'))
 async def approve_user(event):
@@ -163,7 +158,7 @@ async def disapprove_user(event):
             approved_users_collection.delete_one({'user_id': user_to_disapprove.id})
             await event.respond(f"User {user_to_disapprove.username} disapproved from messaging you.")
 
-             user_message_count[user_to_disapprove.id] = 0
+            user_message_count[user_to_disapprove.id] = 0
 
             # Send a new message to notify about the disapproval
             disapproval_message = await client.send_message(
