@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 import asyncio
 from telethon import TelegramClient, events
@@ -12,33 +11,29 @@ from telethon.sessions import StringSession
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-with open('text.json', 'r', encoding='utf-8') as f:
-    text = json.load(f)
 
-# Your Telegram API credentials from environment variables
+# Your credentials for environment variables
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
 bot_owner_id = os.getenv('BOT_OWNER_ID')
 session_string = os.getenv('TELEGRAM_SESSION_STRING')
+video_or_gif_path = os.getenv('GIF_URL')
+mongo_uri = os.getenv('MONGODB_URI')
 
 # Initialize the Telegram client with the bot token
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
 # MongoDB Atlas 
-mongo_uri = os.getenv('MONGODB_URI')
+
 mongo_client = MongoClient(mongo_uri)
-database_name = text["database_name"]
-db = mongo_client[database_name]  
+db = mongo_client['test']  
 approved_users_collection = db['approved_users']
 
 # Spam protection settings
 MAX_UNAPPROVED_MESSAGES = 5
 user_message_count = {}
 approved_users = set()  
-
-# Path to the GIF file
-video_or_gif_path = text["gif_url"]
 
 async def main():
     # Start the client with the session string
@@ -77,7 +72,7 @@ async def handle_pm(event):
             gif_message = await client.send_file(
                 sender.id,
                 video_or_gif_path,
-                caption=text["caption"]
+                caption=os.getenv('GIF_CAPTION')
             )
 
             # Store the message ID in the bot_messages dictionary
@@ -89,7 +84,7 @@ async def handle_pm(event):
 
             # Warn the user if they are close to the limit
             if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
-                warning_message = await event.reply(text["warning_message"])
+                warning_message = await event.reply(os.getenv('WARNING_MESSAGE')
 
                 # Initialize the bot_messages entry if it doesn't exist
                 if sender.id not in bot_messages:
@@ -106,7 +101,7 @@ async def handle_pm(event):
             # Send a final notice before blocking and store the message ID
             final_message = await client.send_message(
                 sender.id,
-                text["final_message"]
+                os.getenv('FINAL_MESSSAGE')
             )
             # Ensure the bot_messages entry exists
             if sender.id not in bot_messages:
