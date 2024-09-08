@@ -30,7 +30,7 @@ db = mongo_client['test']
 approved_users_collection = db['approved_users']
 
 # Spam protection settings
-MAX_UNAPPROVED_MESSAGES = 5
+MAX_UNAPPROVED_MESSAGES = os.getenv('MAX_UNAPPROVED_MSG')
 user_message_count = {}
 approved_users = set()  
 
@@ -83,7 +83,7 @@ async def handle_pm(event):
 
             # Warn the user if they are close to the limit
             if user_message_count[sender.id] == MAX_UNAPPROVED_MESSAGES - 1:
-                warning_message = await event.reply(os.getenv('WARNING_MESSAGE')
+                warning_message = await event.reply(os.getenv('WARNING_MESSAGE'))
 
                 # Initialize the bot_messages entry if it doesn't exist
                 if sender.id not in bot_messages:
