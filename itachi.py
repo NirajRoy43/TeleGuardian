@@ -39,8 +39,8 @@ async def main():
     # Start the client with the session string
     await client.start()
 
-    # Load approved users from MongoDB at startup
-    async for user in approved_users_collection.find():
+    # Load approved users from MongoDB at startup (synchronous iteration)
+    for user in approved_users_collection.find():
         approved_users.add(user['user_id'])
         logger.info(f"Loaded approved user: {user['username']} (ID: {user['user_id']})")
 
