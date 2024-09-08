@@ -126,11 +126,16 @@ async def approve_user(event):
                 {'$set': {'user_id': user_to_approve.id, 'username': user_to_approve.username}},
                 upsert=True
             )
+
+            # Send an approval message
             approval_message = await event.respond(f"User {user_to_approve.username} approved to message you.")
 
-            # Store the approval message ID
-            if user_to_approve.id in bot_messages:
-                bot_messages[user_to_approve.id].append(approval_message.id)
+            # Edit the approval message to notify the user
+            await approval_message.edit(f"User {user_to_approve.username} has been approved to message you.")
+            await asyncio.sleep(2)  # Optional: Wait for a moment before deleting
+
+            # Delete the approval message
+            await approval_message.delete()
 
             # Delete the bot's previous messages for this user (GIF, warnings, etc.)
             if user_to_approve.id in bot_messages:
@@ -160,16 +165,25 @@ async def disapprove_user(event):
             # Remove user from approved list
             approved_users.discard(user_to_disapprove.id)
             approved_users_collection.delete_one({'user_id': user_to_disapprove.id})
-            await event.respond(f"User {user_to_disapprove.username} disapproved from messaging you.")
+
+            # Send a disapproval message
+            disapproval_message = await event.respond(f"User {user_to_disapprove.username} disapproved from messaging you.")
+
+            # Edit the disapproval message to notify the user
+            await disapproval_message.edit(f"User {user_to_disapprove.username} has been disapproved from messaging you.")
+            await asyncio.sleep(2)  # Optional: Wait for a moment before deleting
+
+            # Delete the disapproval message
+            await disapproval_message.delete()
 
             user_message_count[user_to_disapprove.id] = 0
 
             # Send a new message to notify about the disapproval
-            disapproval_message = await client.send_message(
+            notification_message = await client.send_message(
                 user_to_disapprove.id,
                 "You have been disapproved. No further messages will be processed."
             )
-            bot_messages[user_to_disapprove.id] = [disapproval_message.id]
+            bot_messages[user_to_disapprove.id] = [notification_message.id]
 
             # Delete the bot's previous messages for this user (GIF, warnings, etc.)
             if user_to_disapprove.id in bot_messages:
