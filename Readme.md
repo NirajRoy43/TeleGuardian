@@ -18,4 +18,4 @@
    <img align = "center" src = "https://i.postimg.cc/KYD5BVCF/Inkedwjeh-LI.jpg">
 
 2. `MONGODB-URI` : Visit [MongoDB ATLAS](https://www.mongodb.com/cloud/atlas/register) , sign up and fill the registration .
-   login and create new project and cluster 
+   
