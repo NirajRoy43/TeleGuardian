@@ -1,11 +1,9 @@
 ## Deploy TeleGuardian & stop spammers from invading your personal space !
 <br>
-<br>
-<div id="deploy" align="center">
-  
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/_5NJ1H?referralCode=LUJMFv)
 
-</div>
+## PREVIEW :
+
+[![IMG-20240915-072146.jpg](https://i.postimg.cc/FR0GTb29/IMG-20240915-072146.jpg)](https://postimg.cc/tZChT6qf)
 
 <br>
 
@@ -19,23 +17,84 @@
 
 2. `MONGODB-URI` : Visit [MongoDB ATLAS](https://www.mongodb.com/cloud/atlas/register) , sign up and fill the registration .
 
-[![IMG-20240908-124827.jpg](https://i.postimg.cc/2ymFRtkg/IMG-20240908-124827.jpg)](https://postimg.cc/hzy7Vp70)
+- Create A new Free Cluster , create username & password 
+- Go to Network access and add new IP Address
+- Select the option Access from anywhere (0.0.0.0/0)
+- Go to Database
+- In Your Cluster , choose Connect
+- Choose Drivers
+- select python and then copy the connection string below
+- add your own username & password in the string which you created while making cluster
+- that's it !
 
-[![IMG-20240908-124857.jpg](https://i.postimg.cc/5yScbDwz/IMG-20240908-124857.jpg)](https://postimg.cc/xN8pPxpj)
+3. ` TELEGRAM_SESSION_STRING ` : You can generate it from [ here ](https://replit.com/@ErichDaniken/Generate-Telegram-String-Session#main.py)
 
-[![IMG-20240908-124945.jpg](https://i.postimg.cc/tCFJVgzd/IMG-20240908-124945.jpg)](https://postimg.cc/SJNkBk3j)
+or using this
 
-[![IMG-20240914-221217.jpg](https://i.postimg.cc/DZm3QC3k/IMG-20240914-221217.jpg)](https://postimg.cc/R6rY4L0X)
+```py
+pip install telethon
+from telethon import TelegramClient, events
 
-[![IMG-20240914-221115.jpg](https://i.postimg.cc/sDhgS23f/IMG-20240914-221115.jpg)](https://postimg.cc/WhsVcTDx)
+# Replace these with your own API ID, API Hash, and phone number
 
-[![IMG-20240914-221245.jpg](https://i.postimg.cc/CKP4874q/IMG-20240914-221245.jpg)](https://postimg.cc/Y4FgK1Zr)
+api_id = 'YOUR_API_ID'
+api_hash = 'YOUR_API_HASH'
+phone_number = 'YOUR_PHONE_NUMBER'
 
-[![IMG-20240914-221352.jpg](https://i.postimg.cc/NFPbw4Kt/IMG-20240914-221352.jpg)](https://postimg.cc/sG75Y5PH)
+client = TelegramClient('session_name', api_id, api_hash)
 
-[![IMG-20240914-221325.jpg](https://i.postimg.cc/cLQx650F/IMG-20240914-221325.jpg)](https://postimg.cc/ZW5tMH9N)
+@client.on(events.NewMessage)
+async def handler(event):
+    sender = await event.get_sender()
+    print(f'New message from {sender.username}: {event.text}')
+    
+    await event.reply('Hello! This is a response from my bot.')
 
-4. `TELEGRAM_STRING_SESSION` :
+async def main():
+    await client.start(phone=phone_number)
+    print("Client is running...")
+    
+    await client.run_until_disconnected()
 
-5. `GIF_URL`
+with client:
+    client.loop.run_until_complete(main())
+```
+
+4. ` BOT_OWNER_ID ` : Just go to Rose bot.Send any msg and reply to ur msg with /id .
+
+5. ` MAX_UNAPPROVED_MSG ` : No of msg any Unapproved User can send to you before being blocked !
+
+   Recommended: 3
+
+6. `GIF_URL` : your Gif url
+7. ` GIF_CAPTION ` : Write your own caption
+8. ` WARNING_MSG ` : Write Warning Msg
+9. ` FINAL_MSG ` : Write Final Msg here
+
+    [![IMG-20240915-072358.jpg](https://i.postimg.cc/3w4tvQ10/IMG-20240915-072358.jpg)](https://postimg.cc/zLNCsM9q)
+   
+## How it Works ?
+- When anyone sends you a msg , they will instantly receive the GIF and Caption
+- If they Reach the one msg less than `MAX_UNAPPROVED_MSG` , they will receive warning msg
+- If they send again , they will automatically get blocked and final msg will be sent
+- MongoDb is used to store the data of approved or disapproved users 
+
+## Commands !
+
+- `!approve` : to approve the user to text you
+- `!disapprove` : to disapprove user from texting you
+  
+
+## Deploy On Railway
+<br>
+
+<div id="deploy" align="center">
+  
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/_5NJ1H?referralCode=LUJMFv)
+
+</div>
+
+<hr>
+
+[ 🔔 Ping Me ](https://t.me/NemesisRoy) If you get any error 
 
